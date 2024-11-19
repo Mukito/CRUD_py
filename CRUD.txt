@@ -1,0 +1,113 @@
+1 cria a pasta venv (sobe para trabalho)
+2 instala o django
+3 cria o projeto django-admin startproject (nome) .   (o ponto é para criar dentro da pastar os arquivos)(CORAÇÂO DA APLICAÇÂO)
+4 sobe o servidor runserver    `python manage.py runserver`
+5 roda o migrate para criar o banco `python manage.py migrate`     o makemigrations serve para ver se houve atualizações no banco para o migrate
+6 cria o usuário para o admin   `python manage.py createsuperuser` (Cria usuário e senha)
+
+===========================================================================================================================================
+no modelo MVC	-Model Views Control
+CRUD
+7 python manage.py startapp (nome do projeto) - conhecido como AP's
+8 dentro da pasta criada "CORAÇÂO" tem um arquivo urls.py para criar uma url de acesso parecido com o que já tem admin/
+9 depois tem q criar um arquivo url dentro da SEGUNDA pasta como o nome urls.py e ir ao "settings.py" da primeira pasta e adicionar o nome da segunda pasta em INSTALLED_APPs
+10 copia a sintax da pimeira para a segunda e escreve a "home" importando dentro da pagina `from .views import home` dentro a urlpatterns = path('', home)
+11 no arquivo views.py da 2 pasta criada, faz a importação do .models "from .models import Pessoa" e cria a home para devolver um template (index.html)   
+	def home(request):
+	    pessoas = Pessoa.objects.all()      - Para fazer a chamada das pessoas no BD
+	    return render(request, "index.html")
+12 dentro da segunda pasta criada CRIA outra pasta "TEMPLATES" E outro arquivo chamado "index.html" 
+com isso já vai mostrar a Pagina com alguma coisa escrita no seu gosto
+
+=============================================================================================================================================
+começando pelo READ para leitura
+
+
+13 vai em models.py da SEGUNDA pasta e cria uma class Pessoa
+	class Pessoa(models.Model):
+	     nome = models.CharField(max_length=100) (aqui vc pode criar os campos da sua escolha)
+	    
+	     def __str__(self):
+		return self.nome	- Para mostrar o nome da pessoa adicionada		
+
+	*Dentro do arquivo admin.py vc pode criar o Model
+		-importa "from .models import Pessoa"
+		-adiciona "admin.site.register(Pessoa)"
+
+14 Atualiza o BD   makemigrations e migrate e roda o server novamente
+15 dentro do "index.html" na tag body cria uma <ul> e dentro faz um  "for" 
+	{% for pessoa in pessoas %}    - (comando)
+		<li> {{ pessoa.id }} - {{ pessoa.nome }} </li>  (Variável)
+	{% endfor %}
+	* na explicação 1 {% significa Comando e em  {{ significa variável
+
+==================================================================================================================================================
+CREAT
+16 dentro do "index.html" na tag body depois do <ul> criado cria um <form>
+	<form action="" method="POST">
+		{% csrf_token %} - para proteger de ataques
+		<input type="text" name="nome">
+		<button type="submit">Salvar</button>
+	</form>
+17 cria uma url para adicionar no formulário criado com um nome "Salvar"   (no action do farm {% url 'salvar' %})
+	na SEGUNDA pasta no arquivo urls.py cria a url "salvar"
+	- path('salvar/', salvar, nome='salvar') e escreve na importação salvar depois de home, salvar e vai pra views
+
+18 no arquivo views vc cria a função salvar 
+	- def salvar(request):
+	      vnome = request.POST.get("nome")
+	      Pessoa.objects.create(nome=vnome)
+	      pessoas = Pessoa.objects.all()
+	      return render(request, "index.html", {"pessoas": pessoas})    - como na primeira função eu pego as informações de cima e envio para o "index.html"
+
+===================================================================================================================================================
+UPDATE
+19 cria uma link no index.html <a> e uma url com id da pessoa igual a 17 mas com id
+     <a href="{% url 'editar' pessoa.id %}"></a>	
+     -path('editar/<int:id>', editar, name='editar') e escrever na importação editar depois de salvar, "home, salvar, editar," e vai para views
+
+20 na views cria uma função editar()
+	- def editar(request, id):
+		pessoa = Pessoa.objects.get(id=id)  	- ele pega no banco a pessoa pelo id
+		return render(request, "update.html", {"pessoa": pessoa})	- 
+
+21 dentro da segunda pasta na pasta "templates" um arquivo "update.html" com as mesmas conf do "index.html" no imput do form colocar (value='{{pessoa.nome}}')
+	<form action="{% url 'update' pessoa.id %}" method="POST">
+		{% csrf_token %} - para proteger de ataques
+		<input type="text" name="nome" value="{{pessoa.nome}}">
+		<button type="submit">Update</button>
+	</form>
+
+22 no arquivo urls.py cria + um link
+path('update/<int:id>', update, name='update')e escreve na importação update depois de salvar, home, salvar, editar, update e vai pra views
+
+23 no arquivo views cria uma função update()
+	-def update(request, id):
+	      vnome = request.POST.get("nome")
+	      pessoa = Pessoa.objects.get(id=id)
+	      pessoa.nome = vnome
+	      pessoa.save()
+	      return redirect(home)
+24 ainda em views tem que fazer a importação do redirect do lado do render
+25 no arquivo criado "update.html" e copiado do "index.html" a parte ul tira deixando apenas a parte do form
+	{{pessoa.id}} - {{pessoa.nome}}
+	<form action="{% url 'update% pessoa.id %} >
+		{% csrf_token %}
+		<input type="text" name="nome" value="{{pessoa.nome}}">
+		<button type="submit">Update</button>
+	</form>
+
+===================================================================================================================
+
+Delete
+26 abre um outro link "deletar"
+	<a href="{% url 'delete' pessoa.id %}">Deletar</a>
+27 abre outro link na segunda pasta
+	path('delete/<int:id>', delete, name='delete'),
+	ae vai para a views
+28 cria def delete()
+	
+	
+	
+
+
